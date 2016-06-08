@@ -29,8 +29,9 @@
         private void InitializeComponent()
         {
             this.button1 = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
+            this.labelSensorMonitor = new System.Windows.Forms.Label();
+            this.labelSensorMaxMinDetected = new System.Windows.Forms.Label();
+            this.labelSensorId = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // button1
@@ -43,31 +44,41 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // label1
+            // labelSensorMonitor
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(42, 124);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(35, 13);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "label1";
+            this.labelSensorMonitor.AutoSize = true;
+            this.labelSensorMonitor.Location = new System.Drawing.Point(12, 129);
+            this.labelSensorMonitor.Name = "labelSensorMonitor";
+            this.labelSensorMonitor.Size = new System.Drawing.Size(97, 13);
+            this.labelSensorMonitor.TabIndex = 1;
+            this.labelSensorMonitor.Text = "labelSensorMonitor";
             // 
-            // label2
+            // labelSensorMaxMinDetected
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(45, 161);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(35, 13);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "label2";
+            this.labelSensorMaxMinDetected.AutoSize = true;
+            this.labelSensorMaxMinDetected.Location = new System.Drawing.Point(12, 177);
+            this.labelSensorMaxMinDetected.Name = "labelSensorMaxMinDetected";
+            this.labelSensorMaxMinDetected.Size = new System.Drawing.Size(143, 13);
+            this.labelSensorMaxMinDetected.TabIndex = 2;
+            this.labelSensorMaxMinDetected.Text = "labelSensorMaxMinDetected";
+            // 
+            // labelSensorId
+            // 
+            this.labelSensorId.AutoSize = true;
+            this.labelSensorId.Location = new System.Drawing.Point(12, 86);
+            this.labelSensorId.Name = "labelSensorId";
+            this.labelSensorId.Size = new System.Drawing.Size(71, 13);
+            this.labelSensorId.TabIndex = 3;
+            this.labelSensorId.Text = "labelSensorId";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 262);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.labelSensorId);
+            this.Controls.Add(this.labelSensorMaxMinDetected);
+            this.Controls.Add(this.labelSensorMonitor);
             this.Controls.Add(this.button1);
             this.Name = "Form1";
             this.Text = "Form1";
@@ -80,8 +91,9 @@
         #endregion
 
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label labelSensorMonitor;
+        private System.Windows.Forms.Label labelSensorMaxMinDetected;
+        private System.Windows.Forms.Label labelSensorId;
     }
 }
 

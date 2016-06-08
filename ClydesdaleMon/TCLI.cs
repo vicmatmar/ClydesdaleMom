@@ -400,7 +400,7 @@ namespace PowerCalibration
                 if (sendEnter)
                 {
                     telnet_connection.WriteLine("");
-                    Thread.Sleep(100);
+                    Thread.Sleep(200);
                 }
 
                 data = telnet_connection.Read();

@@ -24,6 +24,8 @@ namespace ClydesdaleMon
 
         delegate void setControlPropertyValueCallback(Control control, object value, string property_name);  // Set object text
 
+        uint _read_count = 0;
+
         public Form1()
         {
             InitializeComponent();
@@ -31,13 +33,13 @@ namespace ClydesdaleMon
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            label1.Text = "";
-            label2.Text = "";
+            labelSensorMonitor.Text = "";
+            labelSensorMaxMinDetected.Text = "";
+            labelSensorId.Text = "";
         }
 
         void start_task()
         {
-            button1.Text = "Stop";
             _telnet_connection = new TelnetConnection(Properties.Settings.Default.Ember_Interface_IP_Address, 4900);
             _cancel = new CancellationTokenSource();
             _monitor_task = new Task(monitor_run, _cancel.Token);
@@ -49,29 +51,91 @@ namespace ClydesdaleMon
 
         void monitor_run()
         {
+            _read_count = 0;
+
+            // Clear sensor id
+            controlSetPropertyValue(labelSensorId, "Clear Sensor id");
+            Match m = TCLI.Wait_For_Match(_telnet_connection, "cu si cl", "New Value: 0", 2);
+            // Wait to pair
+            controlSetPropertyValue(labelSensorId, "Waiting to pair");
             while (true)
             {
                 if (_cancel.Token.IsCancellationRequested)
                     return;
 
-                Match m = TCLI.Wait_For_Match(_telnet_connection, "cu lev get", "Current = ([0-9]+)", 2, 100);
+                // Read id
+                m = TCLI.Wait_For_Match(_telnet_connection, "cu si re", "Sensor ID: ([0-9, A-F]+)", 2, 100);
                 if (m.Success)
                 {
+                    int id = 0;
                     try
                     {
-                        string lbltxt = string.Format("{0} - {1}", DateTime.Now.ToString("hh:mm:ss"), m.Groups[0].Value);
-                        controlSetPropertyValue(label1, lbltxt);
+                        id = Convert.ToInt32(m.Groups[1].Value, 16);
+                    }
+                    catch { }
+                    if (id != 0)
+                    {
+                        controlSetPropertyValue(labelSensorId, m.Groups[0].Value);
+                        break;
+                    }
+                }
+            }
 
+            // Calibrate
+            controlSetPropertyValue(labelSensorMonitor, "Press Calibration button");
+            string data = "";
+            while (true)
+            {
+                if (_cancel.Token.IsCancellationRequested)
+                    return;
+
+                data += TCLI.Read(_telnet_connection);
+                if (data.Contains("CMD_CALIBRATION_START"))
+                {
+                    Thread.Sleep(500);
+                    break;
+                }
+            }
+
+            controlSetPropertyValue(labelSensorMonitor, "Turn device 180 degrees AND WAIT");
+            data = "";
+            while (true)
+            {
+                if (_cancel.Token.IsCancellationRequested)
+                    return;
+
+                data += TCLI.Read(_telnet_connection);
+                if (data.Contains("CMD_CALIBRATION_COMPLETE"))
+                {
+                    controlSetPropertyValue(labelSensorMonitor, "CMD_CALIBRATION_COMPLETE");
+                    break;
+                }
+            }
+
+            while (true)
+            {
+                if (_cancel.Token.IsCancellationRequested)
+                    return;
+
+                m = TCLI.Wait_For_Match(_telnet_connection, "cu lev get", "Current = ([0-9]+)", 2, 100);
+                if (m.Success)
+                {
+                    _read_count++;
+                    string lbltxt = string.Format("{0} - {1}", 
+                        DateTime.Now.ToString("hh:mm:ss"), m.Groups[0].Value);
+                    controlSetPropertyValue(labelSensorMonitor, lbltxt);
+                    try
+                    {
                         int val = Convert.ToInt32(m.Groups[1].Value);
                         if (val == 0)
-                            controlSetPropertyValue(label2, "Min detected");
+                            controlSetPropertyValue(labelSensorMaxMinDetected, "Min detected");
                         if (val == 254)
-                            controlSetPropertyValue(label2, "Max detected");
+                            controlSetPropertyValue(labelSensorMaxMinDetected, "Max detected");
 
                     }
                     catch (Exception ex)
                     {
-                        string msg = ex.Message;
+                        controlSetPropertyValue(labelSensorMaxMinDetected, ex.Message);
                     }
                 }
 
@@ -82,14 +146,15 @@ namespace ClydesdaleMon
         void monitor_completed(Task task)
         {
             _telnet_connection.Close();
-            button1.Text = "Start";
+            controlSetPropertyValue(button1, "Start");
         }
 
         void monitor_error(Task task)
         {
             _telnet_connection.Close();
-            button1.Text = "Start";
-            string text = task.Exception.InnerException.Message;
+
+            controlSetPropertyValue(button1, "Start");
+            controlSetPropertyValue(labelSensorMaxMinDetected, task.Exception.InnerException.Message);
         }
 
         void cancel_task()
@@ -102,6 +167,11 @@ namespace ClydesdaleMon
         {
             if (button1.Text == "Start")
             {
+                button1.Text = "Stop";
+                labelSensorId.Text = "";
+                labelSensorMonitor.Text = "";
+                labelSensorMaxMinDetected.Text = "";
+                //controlSetPropertyValue(labelSensorMaxMinDetected, "");
                 start_task();
             }
             else
