@@ -38,9 +38,14 @@ namespace ClydesdaleMon
             labelSensorId.Text = "";
         }
 
+        /// <summary>
+        /// Creates and starts task
+        /// </summary>
         void start_task()
         {
             _telnet_connection = new TelnetConnection(Properties.Settings.Default.Ember_Interface_IP_Address, 4900);
+            labelSensorMaxMinDetected.Text = "Telnet started @ " + Properties.Settings.Default.Ember_Interface_IP_Address;
+
             _cancel = new CancellationTokenSource();
             _monitor_task = new Task(monitor_run, _cancel.Token);
             _monitor_task.ContinueWith(monitor_completed, TaskContinuationOptions.OnlyOnRanToCompletion);
@@ -49,6 +54,10 @@ namespace ClydesdaleMon
             _monitor_task.Start();
         }
 
+        /// <summary>
+        /// Main task function.  
+        /// Monitors the sensors level
+        /// </summary>
         void monitor_run()
         {
             _read_count = 0;
@@ -143,12 +152,20 @@ namespace ClydesdaleMon
 
         }
 
+        /// <summary>
+        /// Called when tasks completes
+        /// </summary>
+        /// <param name="task"></param>
         void monitor_completed(Task task)
         {
             _telnet_connection.Close();
             controlSetPropertyValue(button1, "Start");
         }
 
+        /// <summary>
+        /// Called when running task throws exception
+        /// </summary>
+        /// <param name="task"></param>
         void monitor_error(Task task)
         {
             _telnet_connection.Close();
@@ -157,6 +174,9 @@ namespace ClydesdaleMon
             controlSetPropertyValue(labelSensorMaxMinDetected, task.Exception.InnerException.Message);
         }
 
+        /// <summary>
+        /// Cancels running task
+        /// </summary>
         void cancel_task()
         {
             if (_cancel != null && _cancel.Token.CanBeCanceled)
@@ -171,7 +191,7 @@ namespace ClydesdaleMon
                 labelSensorId.Text = "";
                 labelSensorMonitor.Text = "";
                 labelSensorMaxMinDetected.Text = "";
-                //controlSetPropertyValue(labelSensorMaxMinDetected, "");
+
                 start_task();
             }
             else
@@ -181,6 +201,12 @@ namespace ClydesdaleMon
 
         }
 
+        /// <summary>
+        /// Use to set GUI element properties values when running from a different thread
+        /// </summary>
+        /// <param name="control"></param>
+        /// <param name="value"></param>
+        /// <param name="property_name"></param>
         void controlSetPropertyValue(Control control, object value, string property_name = "Text")
         {
             if (control.InvokeRequired)
